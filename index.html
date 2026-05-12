@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speaking Coach 1v1跟读模拟器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5ede3;--card:#fff;--primary:#6B4EFF;--pl:#ede9ff;
+  --ok:#27ae60;--ok-bg:#e8f8ef;--warn:#f39c12;--warn-bg:#fef9e7;
+  --err:#e74c3c;--err-bg:#fdedec;--info:#3498db;--info-bg:#ebf5fb;
+  --text:#2c3e50;--t2:#7f8c8d;--bdr:#e0e0e0;--shd:0 2px 12px rgba(0,0,0,.06);
+  --r:14px;--line:#c8c8d0;
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+
+.app-header{display:flex;justify-content:space-between;align-items:center;padding:12px 0;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--bdr);margin-bottom:16px}
+.app-header h1{font-size:20px;color:var(--primary)}
+.hctl{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hctl label{font-size:12px;color:var(--t2);display:flex;align-items:center;gap:5px}
+.hctl select{border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px;background:#fff}
+.hctl input[type=range]{width:70px}
+
+/* SIM VIEW */
+.sim{background:var(--card);border-radius:var(--r);box-shadow:var(--shd);overflow:hidden;margin-bottom:20px;position:sticky;top:0;z-index:100}
+.sim-body{display:flex;min-height:200px}
+.sim-teacher{flex:0 0 220px;background:linear-gradient(135deg,#f0e6d6,#e8dcc8);display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden}
+.sim-teacher .avatar{width:100%;height:auto;display:block;object-fit:cover;object-position:top}
+.sim-teacher .badge{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;z-index:2}
+.sim-card{flex:1;display:flex;align-items:center;justify-content:center;padding:16px}
+.wd{text-align:center}.wd .emoji{font-size:48px;margin-bottom:4px}.wd .word{font-size:30px;font-weight:700;color:var(--primary)}.wd .phon{font-size:14px;color:var(--t2);font-style:italic;margin:2px 0}.wd .tr{font-size:12px;color:var(--t2);background:var(--bg);padding:3px 10px;border-radius:6px;display:inline-block;margin-top:4px}
+.wd.sent .word{font-size:19px}
+.sim-bot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--bdr);flex-wrap:wrap}
+.sub-bar{flex:1;background:#1a1a2e;border-radius:8px;padding:8px 14px;min-height:40px;display:flex;flex-direction:column;justify-content:center}
+.sub-en{color:#fff;font-size:14px;font-weight:500;min-height:18px}.sub-zh{color:rgba(255,255,255,.5);font-size:12px;min-height:16px}
+@keyframes pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(107,78,255,.3)}50%{box-shadow:inset 0 0 20px 4px rgba(107,78,255,.15)}}
+.speaking{animation:pulse 1.5s infinite}
+
+.btn{border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--primary);color:#fff}.btn-p:hover{background:#5a3de6}.btn-p:disabled{background:#bbb;cursor:not-allowed}
+.btn-o{background:transparent;border:1.5px solid var(--primary);color:var(--primary)}.btn-o:hover{background:var(--pl)}
+.btn-s{padding:5px 10px;font-size:12px}
+
+.panel{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shd);margin-bottom:16px}
+.ptitle{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ptitle::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px}
+
+/* TIMELINE */
+.tl{display:flex;align-items:center;gap:3px;overflow-x:auto;padding:8px 0;flex-wrap:wrap}
+.tl-n{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid var(--bdr);background:#fff;white-space:nowrap;transition:all .15s}
+.tl-n:hover{border-color:var(--primary);background:var(--pl)}
+.tl-n.on{border-color:var(--primary);background:var(--primary);color:#fff}
+.tl-n.done{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.tl-a{color:var(--t2);font-size:14px;flex-shrink:0}
+
+/* MODE TABS */
+.mode-tabs{display:flex;gap:0;margin-bottom:18px;border:2px solid var(--primary);border-radius:10px;overflow:hidden}
+.mode-tab{flex:1;padding:10px 16px;font-size:14px;font-weight:700;text-align:center;cursor:pointer;background:#fff;color:var(--primary);transition:all .15s;border:none}
+.mode-tab.on{background:var(--primary);color:#fff}
+.mode-tab:hover:not(.on){background:var(--pl)}
+
+/* FLOW NODE */
+.fc{padding:4px 0}
+.fn{position:relative;margin-left:28px;padding-left:22px;border-left:2px solid var(--line);padding-bottom:2px}
+.fn:last-child{border-left-color:transparent}
+.fn::before{content:'';position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--line);border:2px solid #fff;z-index:1}
+.fn.on::before{background:var(--primary);box-shadow:0 0 0 4px rgba(107,78,255,.2)}
+.fn.done::before{background:var(--ok)}
+.fn.indent{margin-left:52px}
+
+.fb{border:2px solid var(--bdr);border-radius:10px;margin-bottom:10px;background:#fff;overflow:hidden;transition:all .15s}
+.fb:hover{border-color:var(--primary)}
+.fb.on{border-color:var(--primary);box-shadow:0 0 0 3px rgba(107,78,255,.12)}
+.fb.interactive{border-color:#9b59b6;background:#faf5ff}
+.fb-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer}
+.fb-icon{font-size:15px;flex-shrink:0}
+.fb-label{flex:1;font-size:13px;font-weight:600}
+.fb-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--bg);color:var(--t2);font-weight:500}
+.fb-sel{font-size:11px;color:var(--ok);font-weight:600;margin-left:4px}
+.fb-play{width:26px;height:26px;border-radius:50%;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fb-play:hover{background:#5a3de6}
+.fb-tog{width:26px;height:26px;border-radius:50%;border:1px solid var(--bdr);background:#fff;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t2)}
+
+/* Variants panel */
+.fv{border-top:1px solid var(--bdr);padding:8px 12px;background:var(--bg);display:none}
+.fv.open{display:block}
+.fv-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--bdr);margin-bottom:4px;background:#fff;cursor:pointer;transition:all .12s;font-size:13px}
+.fv-item:hover{border-color:var(--primary);background:var(--pl)}
+.fv-item.selected{border-color:var(--ok);background:var(--ok-bg)}
+.fv-item.playing{border-color:var(--primary);background:var(--pl);box-shadow:0 0 0 2px rgba(107,78,255,.15)}
+.fv-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--bdr);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.fv-item.selected .fv-radio{border-color:var(--ok);background:var(--ok)}
+.fv-item.selected .fv-radio::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+.fv-text{flex:1}.fv-zh{font-size:11px;color:var(--t2);margin-top:2px}
+.fv-play{width:22px;height:22px;border-radius:50%;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+
+/* Decision */
+.fd{position:relative;margin-left:28px;padding-left:22px;border-left:2px solid var(--line);padding-bottom:2px}
+.fd::before{content:'';position:absolute;left:-8px;top:12px;width:14px;height:14px;background:var(--warn);transform:rotate(45deg);border:2px solid #fff;z-index:1}
+.fd.indent{margin-left:52px}
+.fd-label{font-size:13px;font-weight:700;color:var(--warn);margin-bottom:6px}
+.fd-branches{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.fd-br{flex:1;min-width:100px;padding:8px 10px;border-radius:10px;border:2px solid var(--bdr);background:#fff;cursor:pointer;transition:all .15s;text-align:center;position:relative}
+.fd-br:hover{border-color:var(--primary);transform:translateY(-1px)}
+.fd-br .bdg{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;color:#fff;margin-bottom:3px}
+.bdg-s{background:var(--ok)}.bdg-w{background:var(--warn)}.bdg-d{background:var(--err)}.bdg-i{background:var(--info)}
+.fd-br .bl{font-size:11px;font-weight:600}
+.fd-br.sel{border-color:var(--primary);background:var(--pl);box-shadow:0 0 0 2px rgba(107,78,255,.1)}
+.fd-br.sel::after{content:'✓';position:absolute;top:3px;right:6px;font-size:12px;color:var(--primary);font-weight:700}
+
+.fc-loop{margin-left:28px;padding-left:22px;margin-bottom:10px;font-size:12px;color:var(--info);font-weight:600}
+
+/* BOTTOM BAR */
+.fc-bar{display:flex;align-items:center;gap:10px;margin-top:16px;padding:14px;background:var(--bg);border-radius:10px;flex-wrap:wrap}
+.fc-bar .lab{font-size:13px;font-weight:600;color:var(--t2)}
+.fc-bar .info{font-size:12px;color:var(--t2);margin-left:auto}
+
+/* SCORE MODAL (auto mode) */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.show{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:20px;padding:32px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);transform:scale(.9);transition:transform .2s}
+.modal-bg.show .modal{transform:scale(1)}
+.modal h3{font-size:18px;margin-bottom:6px;color:var(--primary)}
+.modal p{font-size:14px;color:var(--t2);margin-bottom:20px}
+.modal-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.modal-btn{padding:16px 12px;border-radius:12px;border:2px solid var(--bdr);background:#fff;cursor:pointer;transition:all .15s;text-align:center;min-width:100px;flex:1;max-width:200px}
+.modal-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.modal-btn .sc{font-size:24px;font-weight:800;margin-bottom:2px}
+.modal-btn .sl{font-size:13px;font-weight:600;color:var(--t2)}
+.modal-btn.c1{border-color:var(--ok)}.modal-btn.c1:hover{background:var(--ok-bg)}.modal-btn.c1 .sc{color:var(--ok)}
+.modal-btn.c2{border-color:var(--warn)}.modal-btn.c2:hover{background:var(--warn-bg)}.modal-btn.c2 .sc{color:var(--warn)}
+.modal-btn.c3{border-color:var(--err)}.modal-btn.c3:hover{background:var(--err-bg)}.modal-btn.c3 .sc{color:var(--err)}
+.modal-btn.c4{border-color:var(--info)}.modal-btn.c4:hover{background:var(--info-bg)}.modal-btn.c4 .sc{color:var(--info)}
+
+/* Edit summary */
+.edit-summary{margin-top:14px;padding:12px;background:var(--pl);border-radius:10px;font-size:12px;color:var(--primary)}
+.edit-summary .row{display:flex;gap:8px;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(107,78,255,.1)}
+.edit-summary .row:last-child{border:none}
+.edit-summary .rlabel{font-weight:700;min-width:140px;flex-shrink:0}
+.edit-summary .rtext{flex:1;color:var(--text)}
+.edit-ready{margin-top:10px;padding:10px;background:var(--ok-bg);border-radius:8px;color:var(--ok);font-weight:700;font-size:13px;text-align:center}
+.edit-pending{margin-top:10px;padding:10px;background:var(--warn-bg);border-radius:8px;color:var(--warn);font-weight:600;font-size:13px;text-align:center}
+
+/* Score toast — inside teacher panel */
+.score-toast{position:absolute;inset:0;z-index:3;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:rgba(255,255,255,.82);backdrop-filter:blur(4px);
+  border-radius:0;opacity:0;transform:scale(.3);transition:none}
+.score-toast.pop{animation:toastPop 1s ease forwards}
+.score-toast .st-emoji{font-size:40px}
+.score-toast .st-label{font-size:24px;font-weight:900;letter-spacing:1px;text-shadow:0 1px 4px rgba(255,255,255,.6)}
+.score-toast .st-score{font-size:12px;font-weight:600;color:var(--t2)}
+@keyframes toastPop{
+  0%{opacity:0;transform:scale(.3)}
+  18%{opacity:1;transform:scale(1.12)}
+  35%{transform:scale(.95)}
+  50%{transform:scale(1)}
+  78%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(.85) translateY(-10px)}
+}
+
+/* Weak word selector */
+.ww-box{padding:12px;background:var(--pl);border-radius:10px;margin-bottom:10px}
+.ww-box .ww-title{font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.ww-words{display:flex;flex-wrap:wrap;gap:6px}
+.ww-word{padding:6px 14px;border-radius:8px;border:2px solid var(--bdr);background:#fff;cursor:pointer;font-size:15px;font-weight:600;transition:all .15s}
+.ww-word:hover{border-color:var(--primary);background:var(--pl)}
+.ww-word.picked{border-color:var(--err);background:var(--err-bg);color:var(--err)}
+.ww-hint{font-size:11px;color:var(--t2);margin-top:6px}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="app-header">
+  <h1>🎓 Speaking Coach 1v1跟读</h1>
+  <div class="hctl">
+    <label>Voice <select id="voiceSelect"></select></label>
+    <label>语速 <input type="range" id="rateRange" min="0.5" max="2" step="0.1" value="1"><span id="rateVal">1.0</span></label>
+  </div>
+</div>
+
+<!-- SIM VIEW -->
+<div class="sim" id="sim">
+  <div class="sim-body">
+    <div class="sim-teacher" id="teacherPanel">
+      <img class="avatar" src="外教正面11.png" alt="Teacher">
+      <div class="score-toast" id="scoreToast">
+        <div class="st-emoji"></div>
+        <div class="st-label"></div>
+        <div class="st-score"></div>
+      </div>
+      <div class="badge" id="badge">idle</div>
+    </div>
+    <div class="sim-card"><div class="wd" id="wd">
+      <div class="emoji" id="wdE">🎓</div><div class="word" id="wdW">Ready</div>
+      <div class="phon" id="wdP"></div><div class="tr" id="wdT">准备开始</div>
+    </div></div>
+  </div>
+  <div class="sim-bot">
+    <div class="sub-bar"><div class="sub-en" id="subEn">选择课程环节开始模拟</div><div class="sub-zh" id="subZh"></div></div>
+    <button class="btn btn-p" id="playBtn" title="播放">▶</button>
+    <button class="btn btn-o btn-s" id="stopBtn" title="停止">⏹</button>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="panel"><div class="ptitle">课程总览</div><div class="tl" id="tl"></div></div>
+
+<!-- CONFIG -->
+<div class="panel">
+  <div class="ptitle" style="cursor:pointer" onclick="document.getElementById('cfgBody').classList.toggle('hidden')">课程内容配置 <span style="font-size:12px;color:var(--t2)">（点击展开/收起）</span></div>
+  <div id="cfgBody" class="hidden">
+    <div style="margin-bottom:12px"><strong style="font-size:13px">单词</strong><div id="wCfg"></div><button class="btn btn-o btn-s" style="margin-top:6px;width:100%" id="addW">+ 添加单词</button></div>
+    <div style="margin-bottom:12px"><strong style="font-size:13px">句子</strong><div id="sCfg"></div><button class="btn btn-o btn-s" style="margin-top:6px;width:100%" id="addS">+ 添加句子</button></div>
+    <button class="btn btn-p" id="applyCfg">✅ 应用并重置</button>
+  </div>
+</div>
+
+<!-- FLOW CHART PANEL -->
+<div class="panel" id="flowPanel">
+  <div class="ptitle" id="flowTitle">当前环节详细流程</div>
+  <div class="mode-tabs">
+    <div class="mode-tab on" id="tabAuto" onclick="setMode('auto')">🎬 自动播放模式</div>
+    <div class="mode-tab" id="tabEdit" onclick="setMode('edit')">✏️ 编辑路径模式</div>
+  </div>
+  <div id="modeDesc" style="font-size:13px;color:var(--t2);margin-bottom:14px">自动播放：系统随机选词逐节点播放，到打分节点时弹窗让你选档位，然后继续播放相应分支。</div>
+  <div class="fc" id="fc"></div>
+  <div id="editSummary"></div>
+  <div id="fcInfo" style="font-size:12px;color:var(--t2);text-align:center;margin-top:8px"></div>
+</div>
+
+</div>
+
+<!-- SCORE MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">🎤 用户跟读完成</h3>
+    <p id="modalDesc">请选择发音打分档位，系统将播放对应反馈：</p>
+    <div class="modal-btns" id="modalBtns"></div>
+  </div>
+</div>
+
+<script>
+// ============= TTS DATA =============
+const TTS={
+  intro:[{en:"Hi My friend! Do you like toys? Today we're going to learn how to talk about our favourite toys. Let's begin!",zh:"嗨，你喜欢玩具吗？今天我们要学习怎么聊自己最喜欢的玩具。开始吧！"}],
+  opening:[
+    {en:"Let's start with {word}!",zh:"我们先从 {word} 开始吧！"},
+    {en:"Our first word is {word}",zh:"第一个单词是 {word}"},
+    {en:"Let's kick off with {word}",zh:"首先，从 {word} 这个单词开始吧"},
+    {en:"We're starting with {word}",zh:"我们先来学习 {word} 这个单词"},
+    {en:"First up, {word}",zh:"第一个单词是 {word}"}
+  ],
+  leadRead_word:[
+    {en:"Now let's try, {word}",zh:"现在我们来试试，{word_zh}"},
+    {en:"Let me hear your big voice, {word}",zh:"让我听到你响亮的声音，{word_zh}"},
+    {en:"Repeat after me, {word}",zh:"跟我读，{word_zh}"},
+    {en:"Say it clearly and confidently, {word}",zh:"清楚、自信地说出来，{word_zh}"},
+    {en:"Ready? Let's say it together, {word}",zh:"准备好了吗？我们一起说，{word_zh}"},
+    {en:"Say it with me, {word}",zh:"跟我一起说，{word_zh}"}
+  ],
+  leadRead_sentence:[
+    {en:"Listen carefully to how I say it. {sentence} Now you try.",zh:"仔细听我是怎么说的。{zh}"},
+    {en:"Try to catch the sentence, than repeat after me. {sentence}",zh:"试着听懂这个句子，然后跟我读。{zh}"},
+    {en:"{sentence} Now you try.",zh:"{zh}。现在你来"},
+    {en:"Listen and get ready to say it. {sentence}",zh:"听一听，准备跟着说。{zh}"},
+    {en:"Watch my mouth and listen carefully. {sentence} It's your turn",zh:"看我的嘴型，仔细听。{zh}。现在轮到你了"}
+  ],
+  fb_perfect:[
+    {en:"Wow, that was amazing!",zh:"哇，太棒了！"},{en:"Perfect! You're a star!",zh:"完美！你真是小明星！"},
+    {en:"You sound awesome!",zh:"你读得太棒了！"},{en:"Perfect, you're better than you know!",zh:"完美，你比自己想的还要厉害！"},
+    {en:"Brilliant! Easy for you, right?",zh:"太棒了！对你来说很简单，对吧？"}
+  ],
+  fb_great:[
+    {en:"Close!",zh:"很接近了！"},{en:"Nice",zh:"不错哦"},
+    {en:"Good try! Almost there!",zh:"很好的尝试！很接近了！"},{en:"Not bad! Keep going!",zh:"不错！继续加油！"}
+  ],
+  fb_negative:[{en:"Don't worry",zh:"别担心"},{en:"you can do it",zh:"你可以做到的"}],
+  fb_nosound:[{en:"I'm listening",zh:"我在听哦"}],
+  explain_word:[
+    {en:"Let's look at this sound.",zh:"我们来看看这个发音"},{en:"Now look at my mouth",zh:"现在看我的口型"},
+    {en:"Let's focus on this part.",zh:"我们重点看这一部分"},{en:"Here's how it sounds.",zh:"它是这样发音的"},
+    {en:"Check out this pronunciation tip.",zh:"来看一个音标示范"},{en:"Let's check the pronunciation.",zh:"我们来检查一下发音"}
+  ],
+  explain_sentence_1:[
+    {en:'Let\'s look at this word, "{weakest_word}"',zh:"我们来看这个单词，{weakest_word}"},
+    {en:'This sound is a little different. Listen! "{weakest_word}"',zh:"这个音有点不一样，听好了！{weakest_word}"},
+    {en:'Pay attention to the "{weakest_word}"',zh:"注意这个单词，{weakest_word}"}
+  ],
+  explain_sentence_2:[
+    {en:"Watch your {word1} and {word2}",zh:"注意 {word1} 和 {word2} 这两个词"},
+    {en:"Pay attention to {word1} and {word2}",zh:"注意 {word1} 和 {word2}"},
+    {en:"Let's work on {word1} and {word2}",zh:"我们来练习 {word1} 和 {word2}"},
+    {en:"Two words to watch, {word1} and {word2}!",zh:"要注意的两个词：{word1} 和 {word2}！"}
+  ],
+  retryPrompt:[
+    {en:"Give it another try. {word}",zh:"再试一次，{word_zh}"},{en:"One more time, you can do it! {word}",zh:"再来一次，你可以的！{word_zh}"},
+    {en:"Try it one more time. {word}",zh:"再试一次，{word_zh}"},{en:"Go ahead, try again. {word}",zh:"来吧，再试一次 {word_zh}"}
+  ],
+  transition_word:[
+    {en:"Let's move on.",zh:"我们继续吧"},{en:"Okay, next one.",zh:"好，下一个"},
+    {en:"Keep it up.",zh:"保持住，继续加油"},{en:"let's continue.",zh:"我们继续"},
+    {en:"Okay, next word.",zh:"好的，下一个单词"},{en:"Let's look at the next word.",zh:"我们来看下一个单词"},
+    {en:"Ready for more? Here comes another word",zh:"准备好继续了吗？又一个新单词来了"},
+    {en:"Here comes the next.",zh:"下一个来了"},{en:"What's next?",zh:"接下来是什么呢？"}
+  ],
+  transition_sentence:[
+    {en:"Let's look at the next sentence.",zh:"让我们来看下一个句子"},{en:"Next sentence.",zh:"好的，下一个句子"},
+    {en:"Let's try the next sentence.",zh:"我们来试试下一个句子"},{en:"Ready for the next sentence?",zh:"准备好学下一个句子了吗？"},
+    {en:"Here comes the next sentence.",zh:"下一个句子来了"}
+  ],
+  retrySuccess:[
+    {en:"See? I knew you could do it!",zh:"看吧？我就知道你可以做到！"},{en:"good! you are getting better.",zh:"太棒了！发音越来越好"},
+    {en:"Wow, you keep surprising me!",zh:"哇，你总是让我惊喜！"},{en:"You got it!",zh:"你学会了！"},
+    {en:"You just leveled up!",zh:"你刚刚进步啦！"}
+  ],
+  retryFail:[{en:"Okay",zh:"好的"}],
+  summary:[
+    {en:"You finished the words and sentences. Now let's use them to talk.",zh:"你学完了单词和句子，现在让我们用它们来对话吧"},
+    {en:"Now let's use these words in a real conversation.",zh:"现在让我们在真实对话中使用这些单词吧"},
+    {en:"It's time to use what you learned in a real conversation.",zh:"是时候在真实对话中运用你学到的内容了"}
+  ],
+  ending:[
+    {en:"Let me take a look at how you did today, and set up the perfect challenge for you.",zh:"让我看看你今天的表现，然后为你准备一个最适合你的挑战"},
+    {en:"Analyzing your performance now, I'm putting together something just right for you.",zh:"我正在分析你的表现，并为你准备一个刚刚适合你的挑战"},
+    {en:"Give me just a moment… I'm checking your results and building your challenge.",zh:"稍等一下……我正在查看你的结果，并为你生成接下来的挑战"}
+  ]
+};
+
+let lesson={
+  words:[
+    {word:"toy",phonetic:"/tɔɪ/",translation:"n. 玩具",emoji:"🧸",context:"Toy car, toy bear, toy robot — these are all toys.",contextZh:"toy car、toy bear、toy robot——这些都是 toys"},
+    {word:"doll",phonetic:"/dɑːl/",translation:"n. 洋娃娃",emoji:"🪆",context:"A doll can be a girl's best friend.",contextZh:"洋娃娃可以成为女孩最好的朋友"},
+    {word:"robot",phonetic:"/ˈroʊbɑːt/",translation:"n. 机器人",emoji:"🤖",context:"This robot can walk and talk.",contextZh:"这个机器人能走路也能说话"},
+    {word:"car",phonetic:"/kɑːr/",translation:"n. 汽车",emoji:"🚗",context:"I have a red toy car.",contextZh:"我有一辆红色的玩具车"},
+    {word:"bear",phonetic:"/ber/",translation:"n. 熊",emoji:"🧸",context:"My teddy bear is soft and cuddly.",contextZh:"我的泰迪熊又软又可爱"}
+  ],
+  sentences:[
+    {sentence:"What's your favourite toy?",translation:"你最喜欢什么玩具？",context:"Everyone has a favourite toy — so let's learn how to ask about it.",contextZh:"每个人都有自己最喜欢的玩具，今天我们来学怎么用英语问别人\u201c你最喜欢什么玩具\u201d？",image:"https://qz-data.oss-cn-beijing.aliyuncs.com/%E7%8E%A9%E5%85%B7%E6%88%BF.png"},
+    {sentence:"What colour is it?",translation:"它是什么颜色？",context:'How to ask about colour? We can say "what colour is it"?',contextZh:"怎么问颜色呢？我们可以说\u201c它是什么颜色？\u201d",image:"https://qz-data.oss-cn-beijing.aliyuncs.com/%E7%8E%A9%E5%85%B7%E7%86%8A.png"}
+  ]
+};
+
+// ============= ITEMS =============
+let items=[], curItem=0;
+function buildItems(){
+  items=[];
+  items.push({type:'intro',data:null,label:'🎓 导入'});
+  lesson.words.forEach((w,i)=>items.push({type:'word',index:i,data:w,label:'📖 '+w.word}));
+  lesson.sentences.forEach((s,i)=>items.push({type:'sentence',index:i,data:s,label:'💬 句子'+(i+1)}));
+  items.push({type:'summary',data:null,label:'📝 总结'});
+  items.push({type:'ending',data:null,label:'🏆 结束语'});
+}
+function isLastWord(idx){
+  return items[idx]?.type==='word' && (idx+1>=items.length || items[idx+1]?.type!=='word');
+}
+function isFirstWord(i){return items[i]?.type==='word'&&items[i]?.index===0}
+
+// ============= RESOLVE =============
+function rep(t,item){
+  if(!item?.data)return{en:t.en,zh:t.zh};
+  const d=item.data, w=d.word||d.sentence||'', wz=d.translation||'';
+  const ww1=sel.weakWords[0]||w, ww2=sel.weakWords[1]||'';
+  let en=t.en.replace(/\{word\}/g,w).replace(/\{sentence\}/g,w)
+    .replace(/\{word1\}/g,ww1).replace(/\{word2\}/g,ww2)
+    .replace(/\{weakest_word\}/g,ww1);
+  let zh=t.zh.replace(/\{word\}/g,w).replace(/\{word_zh\}/g,wz)
+    .replace(/\{zh\}/g,wz).replace(/\{sentence_zh\}/g,wz)
+    .replace(/\{w1zh\}/g,ww1).replace(/\{w2zh\}/g,ww2);
+  return{en,zh};
+}
+function getPool(nodeId,item){
+  if(!item)return[];
+  const isW=item.type==='word', d=item.data;
+  const brKey=sel.scoreBranch;
+  const rbrKey=sel.retryBranch;
+  switch(nodeId){
+    case 'opening': return TTS.opening;
+    case 'context': return d.context?[{en:d.context,zh:d.contextZh||''}]:[];
+    case 'lead_read': return isW?TTS.leadRead_word:TTS.leadRead_sentence;
+    case 'feedback':
+      if(brKey==='perfect')return TTS.fb_perfect;if(brKey==='great')return TTS.fb_great;
+      if(brKey==='negative')return TTS.fb_negative;return TTS.fb_nosound;
+    case 'explain':
+      if(isW) return TTS.explain_word;
+      return sel.weakWords.length>=2?TTS.explain_sentence_2:TTS.explain_sentence_1;
+    case 'retry_prompt': return TTS.retryPrompt;
+    case 'retry_fb': return rbrKey==='success'?TTS.retrySuccess:TTS.retryFail;
+    case 'transition':
+      // Last word uses sentence transition to bridge into sentences
+      if(isW&&isLastWord(curItem)) return TTS.transition_sentence;
+      return isW?TTS.transition_word:TTS.transition_sentence;
+    default: return[];
+  }
+}
+function getVars(nodeId,item){return getPool(nodeId,item).map(t=>rep(t,item))}
+function getSimpleVars(it){
+  if(!it)return[];
+  if(it.type==='intro')return TTS.intro.map(t=>rep(t,it));
+  if(it.type==='summary')return TTS.summary.map(t=>rep(t,it));
+  if(it.type==='ending')return TTS.ending.map(t=>rep(t,it));
+  return[];
+}
+
+// ============= FLOW STRUCTURE =============
+function getFlowNodes(){
+  const item=items[curItem];
+  if(!item||!['word','sentence'].includes(item.type)) return[];
+  const isW=item.type==='word';
+  let nodes=[];
+  if(isFirstWord(curItem)) nodes.push({id:'opening',icon:'👋',label:'开场白',tag:'导入',kind:'tts'});
+  nodes.push(
+    {id:'context',icon:'📖',label:'带读文本',tag:'听读',kind:'tts'},
+    {id:'lead_read',icon:'🗣',label:'串场1 · AI带读',tag:'听读',kind:'tts'},
+    {id:'user_read',icon:'🎤',label:'用户跟读',tag:'听读',kind:'interactive'},
+    {id:'scoring',kind:'decision',branches:[
+      {key:'perfect',badge:'bdg-s',score:'70-100',label:'Perfect · 直接过渡',note:'跳过纠音'},
+      {key:'great',badge:'bdg-w',score:'30-69',label:'Great · 进入纠音'},
+      {key:'negative',badge:'bdg-d',score:'0-29',label:'Try Again · 进入纠音'},
+      {key:'nosound',badge:'bdg-i',score:'异常',label:'无声 · 进入纠音'}
+    ]},
+    {id:'feedback',icon:'💬',label:'反馈播报',tag:'反馈',kind:'tts'}
+  );
+  // All non-perfect go to explain/correction
+  if(sel.scoreBranch!=='perfect'){
+    if(isW){
+      // WORD correction: explain → mouth clip → retry
+      nodes.push(
+        {id:'explain',icon:'🔍',label:'串场3 · 发音讲解',tag:'讲解',kind:'tts',indent:true},
+        {id:'mouth_clip',icon:'👄',label:'口型切片 (视频)',tag:'讲解',kind:'media',indent:true}
+      );
+    } else {
+      // SENTENCE correction: select weak words → explain with template
+      nodes.push(
+        {id:'weak_select',icon:'🔤',label:'选择发音较弱的单词',tag:'讲解',kind:'weak_select',indent:true},
+        {id:'explain',icon:'🔍',label:'串场3 · 弱词示范',tag:'讲解',kind:'tts',indent:true}
+      );
+    }
+    // Common retry path
+    nodes.push(
+      {id:'retry_prompt',icon:'🔄',label:'串场3-1 · 再跟读提示',tag:'讲解',kind:'tts',indent:true},
+      {id:'user_retry',icon:'🎤',label:'用户再次跟读',tag:'讲解',kind:'interactive',indent:true},
+      {id:'retry_scoring',kind:'decision2',indent:true,branches:[
+        {key:'success',badge:'bdg-s',score:'≥65',label:'串场5 · 进步了'},
+        {key:'fail',badge:'bdg-d',score:'<65',label:'串场6 · 继续加油'}
+      ]},
+      {id:'retry_fb',icon:'💬',label:'再次反馈',tag:'讲解',kind:'tts',indent:true}
+    );
+  }
+  const transLabel = isW && isLastWord(curItem) ? '串场4 · 过渡到句子' : '串场4 · 过渡下一个';
+  nodes.push({id:'transition',icon:'➡️',label:transLabel,tag:'过渡',kind:'tts'});
+  return nodes;
+}
+
+function getTTSNodes(){
+  return getFlowNodes().filter(n=>n.kind==='tts');
+}
+
+// ============= STATE =============
+let mode='auto'; // 'auto'|'edit'
+let sel={
+  scoreBranch:'perfect', retryBranch:'success',
+  picks:{}, weakWords:[], // weakWords: selected weak words for sentence correction
+  expandedNode:null
+};
+let autoState={running:false, nodeIdx:0, nodes:[]};
+
+// ============= TTS ENGINE =============
+let synth=window.speechSynthesis, voices=[], selVoice=null;
+function loadVoices(){
+  voices=synth.getVoices().filter(v=>v.lang.startsWith('en'));
+  const s=document.getElementById('voiceSelect');s.innerHTML='';
+  voices.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+' ('+v.lang+')';if(v.name.includes('Samantha')||v.name.includes('Google US'))o.selected=true;s.appendChild(o)});
+  selVoice=voices[s.selectedIndex]||voices[0];
+}
+function speak(text,cb){
+  synth.cancel();if(!text){cb?.();return}
+  const u=new SpeechSynthesisUtterance(text);u.voice=selVoice;u.rate=parseFloat(document.getElementById('rateRange').value);
+  u.onend=()=>cb?.();u.onerror=()=>cb?.();synth.speak(u);
+}
+function stopAll(){synth.cancel();autoState.running=false;hideModal();setTeacher('idle');render()}
+
+// ============= UI HELPERS =============
+function setSub(en,zh){document.getElementById('subEn').textContent=en||'';document.getElementById('subZh').textContent=zh||''}
+function setTeacher(s){
+  const p=document.getElementById('teacherPanel'),b=document.getElementById('badge');p.classList.remove('speaking');
+  if(s==='speaking'){p.classList.add('speaking');b.textContent='🗣 Speaking'}else if(s==='waiting'){b.textContent='🎤 Waiting'}else{b.textContent='idle'}
+}
+function showModal(title,desc,buttons){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalDesc').textContent=desc;
+  const c=document.getElementById('modalBtns');c.innerHTML='';
+  buttons.forEach(b=>{const d=document.createElement('div');d.className='modal-btn '+b.cls;d.innerHTML=`<div class="sc">${b.score}</div><div class="sl">${b.label}</div>`;d.onclick=b.onclick;c.appendChild(d)});
+  document.getElementById('modalBg').classList.add('show');
+}
+function hideModal(){document.getElementById('modalBg').classList.remove('show')}
+
+const SCORE_TOAST_CFG={
+  perfect:{emoji:'🌟',label:'Perfect!',color:'var(--ok)'},
+  great:{emoji:'👍',label:'Great!',color:'var(--warn)'},
+  negative:{emoji:'💪',label:'Try Again',color:'var(--err)'},
+  nosound:{emoji:'🔇',label:'No Sound',color:'var(--info)'}
+};
+function showScoreToast(key){
+  const cfg=SCORE_TOAST_CFG[key];if(!cfg)return;
+  const el=document.getElementById('scoreToast');
+  el.querySelector('.st-emoji').textContent=cfg.emoji;
+  el.querySelector('.st-label').textContent=cfg.label;
+  el.querySelector('.st-label').style.color=cfg.color;
+  const br=autoState.nodes[autoState.nodeIdx]?.branches?.find(b=>b.key===key);
+  el.querySelector('.st-score').textContent=br?br.score:'';
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+function showWeakWordModal(words){
+  const modal=document.getElementById('modalBg');
+  document.getElementById('modalTitle').textContent='🔤 选择发音较弱的单词';
+  document.getElementById('modalDesc').textContent='点击 1-2 个弱词，选好后点确认：';
+
+  function refreshBtns(){
+    const c=document.getElementById('modalBtns');c.innerHTML='';
+    words.forEach(w=>{
+      const picked=sel.weakWords.includes(w);
+      const d=document.createElement('div');
+      d.className='modal-btn '+(picked?'c1':'c2');
+      d.innerHTML=`<div class="sc">${w}</div><div class="sl">${picked?'✓ 已选':'点击选择'}</div>`;
+      d.onclick=()=>{
+        const idx=sel.weakWords.indexOf(w);
+        if(idx>=0){sel.weakWords.splice(idx,1)}
+        else if(sel.weakWords.length<2){sel.weakWords.push(w)}
+        else{sel.weakWords.shift();sel.weakWords.push(w)}
+        refreshBtns();
+      };
+      c.appendChild(d);
+    });
+    const confirmBtn=document.createElement('div');
+    confirmBtn.className='modal-btn c1';
+    confirmBtn.style.cssText='width:100%;max-width:100%;margin-top:8px';
+    confirmBtn.innerHTML=`<div class="sc">✓</div><div class="sl">确认选择 (${sel.weakWords.length} 个)</div>`;
+    confirmBtn.onclick=()=>{
+      if(sel.weakWords.length===0){sel.weakWords.push(words[0])}
+      hideModal();rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext();
+    };
+    c.appendChild(confirmBtn);
+  }
+  refreshBtns();
+  modal.classList.add('show');
+}
+
+// ============= RENDER =============
+function render(){
+  renderTimeline();renderSim();renderFlow();
+}
+function renderTimeline(){
+  const c=document.getElementById('tl');c.innerHTML='';
+  items.forEach((it,i)=>{
+    if(i>0){const a=document.createElement('span');a.className='tl-a';a.textContent='→';c.appendChild(a)}
+    const n=document.createElement('div');n.className='tl-n'+(i===curItem?' on':'')+(i<curItem?' done':'');
+    n.textContent=it.label;n.onclick=()=>jumpTo(i);c.appendChild(n);
+  });
+}
+function renderSim(){
+  const it=items[curItem],wd=document.getElementById('wd'),e=document.getElementById('wdE'),w=document.getElementById('wdW'),p=document.getElementById('wdP'),t=document.getElementById('wdT');
+  wd.classList.remove('sent');
+  if(!it)return;
+  if(it.type==='intro'){e.textContent='🎓';w.textContent='Welcome!';p.textContent='';t.textContent='课程导入'}
+  else if(it.type==='summary'){e.textContent='📝';w.textContent='Summary';p.textContent='';t.textContent='总结'}
+  else if(it.type==='ending'){e.textContent='🏆';w.textContent='Well Done!';p.textContent='';t.textContent='课程结束'}
+  else if(it.type==='word'){e.textContent=it.data.emoji||'📖';w.textContent=it.data.word;p.textContent=it.data.phonetic;t.textContent=it.data.translation}
+  else if(it.type==='sentence'){wd.classList.add('sent');e.textContent='💬';w.textContent=it.data.sentence;p.textContent='';t.textContent=it.data.translation}
+  document.getElementById('flowTitle').textContent='当前环节详细流程 — '+it.label;
+}
+
+function renderFlow(){
+  const fc=document.getElementById('fc'), it=items[curItem];fc.innerHTML='';
+  // Simple items
+  if(!it||!['word','sentence'].includes(it.type)){
+    const vars=getSimpleVars(it);
+    let h='<div class="fn on"><div class="fb on"><div class="fb-hd">';
+    h+=`<span class="fb-icon">${it?.label?.charAt(0)||'🎓'}</span><span class="fb-label">${it?.label||''}</span>`;
+    if(vars.length) h+=`<button class="fb-play" onclick="previewVar('__simple',0)">▶</button>`;
+    h+=`<button class="fb-tog" onclick="togExp('__simple')">▼</button></div>`;
+    h+=`<div class="fv${sel.expandedNode==='__simple'?' open':''}" id="vars___simple">`;
+    vars.forEach((v,i)=>{h+=varHtml('__simple',v,i)});
+    h+='</div></div></div>';
+    fc.innerHTML=h;
+    renderEditSummary();updatePlayBtn();return;
+  }
+
+  const nodes=getFlowNodes();
+  let h='';
+  nodes.forEach(n=>{
+    if(n.kind==='decision'||n.kind==='decision2'){
+      h+=renderDecision(n);return;
+    }
+    if(n.kind==='loop'){
+      h+=`<div class="fc-loop">↩ 返回「用户跟读」重新收音</div>`;return;
+    }
+    const isActive=autoState.running&&autoState.nodes[autoState.nodeIdx]?.id===n.id;
+    const hasPick=sel.picks[n.id]!==undefined;
+    const indCls=n.indent?' indent':'';
+    const interCls=n.kind==='interactive'?' interactive':'';
+
+    // Weak word selector: special full-width inline render
+    if(n.kind==='weak_select'){
+      const wwDone=sel.weakWords.length>0;
+      h+=`<div class="fn${isActive?' on':''}${wwDone?' done':''}${indCls}">`;
+      h+=`<div class="fb${isActive?' on':''}" style="border-color:#9b59b6;background:#faf5ff">`;
+      h+=`<div class="fb-hd"><span class="fb-icon">${n.icon}</span><span class="fb-label">${n.label}</span>`;
+      if(n.tag)h+=`<span class="fb-tag">${n.tag}</span>`;
+      if(wwDone)h+=`<span class="fb-sel">✓ ${sel.weakWords.join(', ')}</span>`;
+      h+=`</div>`;
+      h+=renderWeakWordSelector();
+      h+=`</div></div>`;
+      return;
+    }
+
+    h+=`<div class="fn${isActive?' on':''}${hasPick?' done':''}${indCls}">`;
+    h+=`<div class="fb${isActive?' on':''}${interCls}">`;
+    h+=`<div class="fb-hd" onclick="togExp('${n.id}')">`;
+    h+=`<span class="fb-icon">${n.icon}</span><span class="fb-label">${n.label}</span>`;
+    if(n.tag)h+=`<span class="fb-tag">${n.tag}</span>`;
+    if(hasPick)h+=`<span class="fb-sel">✓ 已选</span>`;
+    if(n.kind==='tts')h+=`<button class="fb-play" onclick="event.stopPropagation();previewRandom('${n.id}')">🔊</button>`;
+    h+=`<button class="fb-tog" onclick="event.stopPropagation();togExp('${n.id}')">▼</button>`;
+    h+=`</div>`;
+    // Variants
+    const vars=n.kind==='tts'?getVars(n.id,it):[];
+    h+=`<div class="fv${sel.expandedNode===n.id?' open':''}" id="vars_${n.id}">`;
+    if(n.kind==='interactive'){
+      h+='<div style="padding:6px;font-size:12px;color:var(--t2)">交互节点 — 用户发音环节（自动播放时弹窗选档位）</div>';
+    } else if(n.kind==='media'){
+      h+='<div style="padding:6px;font-size:12px;color:var(--t2)">媒体节点 — 口型切片视频播放</div>';
+    } else {
+      vars.forEach((v,i)=>{h+=varHtml(n.id,v,i)});
+    }
+    h+='</div></div></div>';
+  });
+  fc.innerHTML=h;
+  renderEditSummary();updatePlayBtn();
+}
+
+function varHtml(nodeId,v,i){
+  const picked=sel.picks[nodeId]===i;
+  const isEdit=mode==='edit';
+  let cls='fv-item'+(picked?' selected':'');
+  let onclick=isEdit?`selectVar('${nodeId}',${i})`:`previewVar('${nodeId}',${i})`;
+  let h=`<div class="${cls}" onclick="${onclick}">`;
+  if(isEdit) h+=`<div class="fv-radio"></div>`;
+  h+=`<div class="fv-text">${v.en}<div class="fv-zh">${v.zh}</div></div>`;
+  h+=`<button class="fv-play" onclick="event.stopPropagation();previewVar('${nodeId}',${i})" title="试听">▶</button>`;
+  h+=`</div>`;
+  return h;
+}
+
+function renderDecision(n){
+  const isRetry=n.kind==='decision2';
+  const curBranch=isRetry?sel.retryBranch:sel.scoreBranch;
+  const indCls=n.indent?' indent':'';
+  let h=`<div class="fd${indCls}">`;
+  h+=`<div class="fd-label">◆ ${isRetry?'再次打分分支':'打分反馈分支'}</div><div class="fd-branches">`;
+  n.branches.forEach(b=>{
+    const s=curBranch===b.key?' sel':'';
+    const fn=isRetry?`selRetryBranch('${b.key}')`:`selScoreBranch('${b.key}')`;
+    h+=`<div class="fd-br${s}" onclick="${fn}"><div class="bdg ${b.badge}">${b.score}</div><div class="bl">${b.label}</div></div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
+function renderWeakWordSelector(){
+  const it=items[curItem];
+  if(!it||it.type!=='sentence') return'<div style="padding:6px;font-size:12px;color:var(--t2)">仅句子环节可用</div>';
+  const words=it.data.sentence.replace(/[?.!,]/g,'').split(/\s+/).filter(Boolean);
+  let h='<div class="ww-box"><div class="ww-title">点击选择 1-2 个发音较弱的单词：</div><div class="ww-words">';
+  words.forEach(w=>{
+    const picked=sel.weakWords.includes(w);
+    h+=`<div class="ww-word${picked?' picked':''}" onclick="toggleWeakWord('${w}')">${w}</div>`;
+  });
+  h+='</div>';
+  if(sel.weakWords.length>0){
+    h+=`<div class="ww-hint">已选 ${sel.weakWords.length} 个弱词：${sel.weakWords.join(', ')}`;
+    if(sel.weakWords.length===1) h+=' → 使用单词纠正模板';
+    else h+=' → 使用双词纠正模板';
+    h+='</div>';
+  } else {
+    h+='<div class="ww-hint">请至少选择 1 个单词（最多 2 个）</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function toggleWeakWord(w){
+  const idx=sel.weakWords.indexOf(w);
+  if(idx>=0){sel.weakWords.splice(idx,1)}
+  else if(sel.weakWords.length<2){sel.weakWords.push(w)}
+  else{sel.weakWords.shift();sel.weakWords.push(w)}
+  delete sel.picks['explain'];
+  renderFlow();
+}
+
+function renderEditSummary(){
+  const c=document.getElementById('editSummary');
+  if(mode!=='edit'){c.innerHTML='';return}
+  const it=items[curItem];
+  if(!it||!['word','sentence'].includes(it.type)){c.innerHTML='';return}
+  const ttsNodes=getTTSNodes();
+  const total=ttsNodes.length;
+  const done=ttsNodes.filter(n=>sel.picks[n.id]!==undefined).length;
+  let h='<div class="edit-summary">';
+  ttsNodes.forEach(n=>{
+    const vars=getVars(n.id,it);
+    const pi=sel.picks[n.id];
+    const text=pi!==undefined&&vars[pi]?vars[pi].en:'❓ 未选择';
+    h+=`<div class="row"><span class="rlabel">${n.icon} ${n.label}</span><span class="rtext">${text}</span></div>`;
+  });
+  h+='</div>';
+  if(done===total) h+=`<div class="edit-ready">✅ 全部 ${total} 个节点已选择，可以开始播放！</div>`;
+  else h+=`<div class="edit-pending">⏳ 已选 ${done}/${total} 个节点，请继续选择剩余文案</div>`;
+  c.innerHTML=h;
+}
+
+function updatePlayBtn(){
+  const btn=document.getElementById('playBtn');
+  btn.textContent='▶';
+  btn.onclick=mode==='auto'?startAutoPlay:startEditPlay;
+  document.getElementById('modeDesc').textContent=mode==='auto'
+    ?'自动播放：系统随机选词逐节点播放，到打分节点时弹窗让你选档位。'
+    :'编辑路径：逐节点点选文案，全部选好后点 ▶ 一键播放完整上课体验。';
+}
+
+// ============= INTERACTIONS =============
+function setMode(m){mode=m;sel.picks={};sel.weakWords=[];sel.expandedNode=null;
+  document.getElementById('tabAuto').classList.toggle('on',m==='auto');
+  document.getElementById('tabEdit').classList.toggle('on',m==='edit');
+  render();
+}
+function jumpTo(i){stopAll();curItem=i;sel.picks={};sel.weakWords=[];sel.expandedNode=null;sel.scoreBranch='perfect';sel.retryBranch='success';render();setSub('已跳转到 '+items[i].label,'')}
+function togExp(id){sel.expandedNode=sel.expandedNode===id?null:id;renderFlow()}
+function selScoreBranch(k){sel.scoreBranch=k;sel.expandedNode=null;sel.weakWords=[];
+  delete sel.picks['feedback'];delete sel.picks['explain'];delete sel.picks['retry_prompt'];delete sel.picks['retry_fb'];
+  renderFlow();
+}
+function selRetryBranch(k){sel.retryBranch=k;delete sel.picks['retry_fb'];renderFlow()}
+
+function selectVar(nodeId,idx){
+  sel.picks[nodeId]=idx;renderFlow();
+}
+function previewVar(nodeId,idx){
+  stopAll();
+  const it=items[curItem];
+  let vars=nodeId==='__simple'?getSimpleVars(it):getVars(nodeId,it);
+  if(idx>=vars.length)return;
+  setSub(vars[idx].en,vars[idx].zh);setTeacher('speaking');
+  speak(vars[idx].en,()=>setTeacher('idle'));
+}
+function previewRandom(nodeId){
+  const it=items[curItem];
+  const vars=getVars(nodeId,it);
+  if(!vars.length)return;
+  previewVar(nodeId,Math.floor(Math.random()*vars.length));
+}
+
+// ============= AUTO PLAY =============
+function startAutoPlay(){
+  stopAll();
+  const it=items[curItem];
+  if(!it||!['word','sentence'].includes(it.type)){
+    const vars=getSimpleVars(it);if(!vars.length)return;
+    const pick=vars[Math.floor(Math.random()*vars.length)];
+    setSub(pick.en,pick.zh);setTeacher('speaking');
+    speak(pick.en,()=>setTeacher('idle'));
+    return;
+  }
+  autoState.running=true;
+  autoState.nodes=getFlowNodes();
+  autoState.nodeIdx=0;
+  autoPlayNext();
+}
+
+function autoPlayNext(){
+  if(!autoState.running)return;
+  if(autoState.nodeIdx>=autoState.nodes.length){autoState.running=false;setSub('✅ 当前环节播放完成','');setTeacher('idle');render();return}
+  const n=autoState.nodes[autoState.nodeIdx];
+  const it=items[curItem];
+  render();
+  document.getElementById('fcInfo').textContent=`播放 ${autoState.nodeIdx+1}/${autoState.nodes.length}`;
+
+  if(n.kind==='decision'){
+    // show score modal
+    setTeacher('waiting');
+    setSub('🎤 用户跟读完成，请选择打分档位...','');
+    showModal('🎤 用户跟读完成','请选择此次发音的打分档位：',[
+      {score:'70-100',label:'Perfect',cls:'c1',onclick:()=>{hideModal();showScoreToast('perfect');sel.scoreBranch='perfect';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}},
+      {score:'30-69',label:'Great',cls:'c2',onclick:()=>{hideModal();showScoreToast('great');sel.scoreBranch='great';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}},
+      {score:'0-29',label:'Try Again',cls:'c3',onclick:()=>{hideModal();showScoreToast('negative');sel.scoreBranch='negative';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}},
+      {score:'异常',label:'无声',cls:'c4',onclick:()=>{hideModal();showScoreToast('nosound');sel.scoreBranch='nosound';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}}
+    ]);
+    return;
+  }
+  if(n.kind==='decision2'){
+    setTeacher('waiting');
+    setSub('🎤 用户再次跟读完成，请选择打分档位...','');
+    showModal('🎤 再次跟读完成','请选择此次发音的打分档位：',[
+      {score:'≥65',label:'进步了！',cls:'c1',onclick:()=>{hideModal();showScoreToast('perfect');sel.retryBranch='success';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}},
+      {score:'<65',label:'继续加油',cls:'c3',onclick:()=>{hideModal();showScoreToast('negative');sel.retryBranch='fail';rebuildAutoNodes();autoState.nodeIdx++;autoPlayNext()}}
+    ]);
+    return;
+  }
+  if(n.kind==='weak_select'){
+    setTeacher('waiting');
+    setSub('🔤 请选择句子中发音较弱的单词...','');
+    sel.weakWords=[];
+    const sentIt=items[curItem];
+    const words=sentIt.data.sentence.replace(/[?.!,]/g,'').split(/\s+/).filter(Boolean);
+    showWeakWordModal(words);
+    return;
+  }
+  if(n.kind==='interactive'){
+    setSub('🎤 '+n.label+' — 模拟用户发音中...','');
+    setTeacher('waiting');render();
+    setTimeout(()=>{if(autoState.running){autoState.nodeIdx++;autoPlayNext()}},1200);
+    return;
+  }
+  if(n.kind==='loop'){
+    setSub('↩ 无声 — 返回重新收音','');
+    autoState.nodeIdx++;setTimeout(()=>{if(autoState.running)autoPlayNext()},800);return;
+  }
+  if(n.kind==='media'){
+    setSub('👄 口型切片视频播放中...','');setTeacher('speaking');render();
+    setTimeout(()=>{if(autoState.running){autoState.nodeIdx++;autoPlayNext()}},1500);return;
+  }
+  // TTS node
+  const vars=getVars(n.id,it);
+  if(!vars.length){autoState.nodeIdx++;autoPlayNext();return}
+  const pick=vars[Math.floor(Math.random()*vars.length)];
+  setSub(pick.en,pick.zh);setTeacher('speaking');render();
+  speak(pick.en,()=>{setTeacher('idle');if(autoState.running){autoState.nodeIdx++;setTimeout(autoPlayNext,400)}});
+}
+
+function rebuildAutoNodes(){
+  const curId=autoState.nodes[autoState.nodeIdx]?.id;
+  autoState.nodes=getFlowNodes();
+  const newIdx=autoState.nodes.findIndex(n=>n.id===curId);
+  if(newIdx>=0) autoState.nodeIdx=newIdx;
+}
+
+// ============= EDIT PLAY =============
+function startEditPlay(){
+  stopAll();
+  const it=items[curItem];
+  if(!it||!['word','sentence'].includes(it.type))return;
+  const ttsNodes=getTTSNodes();
+  const allPicked=ttsNodes.every(n=>sel.picks[n.id]!==undefined);
+  if(!allPicked){
+    setSub('⚠️ 请先为所有 TTS 节点选择文案','展开每个节点，点击选择要播放的文案');
+    return;
+  }
+  // Build play queue from picks
+  const queue=ttsNodes.map(n=>{
+    const vars=getVars(n.id,it);
+    const idx=sel.picks[n.id];
+    return{id:n.id,icon:n.icon,label:n.label,text:vars[idx]};
+  }).filter(q=>q.text);
+
+  let qi=0;
+  autoState.running=true;
+
+  function playNext(){
+    if(!autoState.running||qi>=queue.length){
+      autoState.running=false;setSub('✅ 编辑路径播放完成','');setTeacher('idle');render();return;
+    }
+    const q=queue[qi];
+    autoState.nodeIdx=getFlowNodes().findIndex(n=>n.id===q.id);
+    autoState.nodes=getFlowNodes();
+    document.getElementById('fcInfo').textContent=`播放 ${qi+1}/${queue.length} — ${q.icon} ${q.label}`;
+    setSub(q.text.en,q.text.zh);setTeacher('speaking');render();
+    speak(q.text.en,()=>{setTeacher('idle');qi++;if(autoState.running)setTimeout(playNext,400)});
+  }
+  playNext();
+}
+
+// ============= CONFIG =============
+function renderCfg(){
+  const wc=document.getElementById('wCfg');wc.innerHTML='';
+  lesson.words.forEach((w,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap';
+    d.innerHTML=`<input style="flex:1;min-width:50px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${w.word}" onchange="lesson.words[${i}].word=this.value" placeholder="word">
+    <input style="flex:1;min-width:50px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${w.phonetic}" onchange="lesson.words[${i}].phonetic=this.value" placeholder="音标">
+    <input style="flex:1;min-width:50px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${w.translation}" onchange="lesson.words[${i}].translation=this.value" placeholder="释义">
+    <input style="flex:2;min-width:100px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${w.context}" onchange="lesson.words[${i}].context=this.value" placeholder="带读文本">
+    <button style="border:1px solid var(--err);background:none;color:var(--err);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px" onclick="lesson.words.splice(${i},1);renderCfg()">×</button>`;
+    wc.appendChild(d)});
+  const sc=document.getElementById('sCfg');sc.innerHTML='';
+  lesson.sentences.forEach((s,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap';
+    d.innerHTML=`<input style="flex:2;min-width:120px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${s.sentence}" onchange="lesson.sentences[${i}].sentence=this.value" placeholder="句子">
+    <input style="flex:1;min-width:60px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${s.translation}" onchange="lesson.sentences[${i}].translation=this.value" placeholder="翻译">
+    <input style="flex:2;min-width:120px;border:1px solid var(--bdr);border-radius:6px;padding:4px 8px;font-size:12px" value="${s.context||''}" onchange="lesson.sentences[${i}].context=this.value" placeholder="带读文本">
+    <button style="border:1px solid var(--err);background:none;color:var(--err);border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px" onclick="lesson.sentences.splice(${i},1);renderCfg()">×</button>`;
+    sc.appendChild(d)});
+}
+
+// ============= INIT =============
+function init(){
+  loadVoices();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadVoices;
+  document.getElementById('voiceSelect').onchange=function(){selVoice=voices[this.selectedIndex]};
+  document.getElementById('rateRange').oninput=function(){document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)};
+  document.getElementById('stopBtn').onclick=stopAll;
+  document.getElementById('addW').onclick=()=>{lesson.words.push({word:'',phonetic:'',translation:'',emoji:'📖',context:'',contextZh:''});renderCfg()};
+  document.getElementById('addS').onclick=()=>{lesson.sentences.push({sentence:'',translation:'',context:'',contextZh:''});renderCfg()};
+  document.getElementById('applyCfg').onclick=()=>{stopAll();buildItems();curItem=0;sel.picks={};sel.weakWords=[];sel.expandedNode=null;sel.scoreBranch='perfect';sel.retryBranch='success';render();setSub('课程已重置','')};
+  document.getElementById('modalBg').onclick=function(e){if(e.target===this)hideModal()};
+
+  buildItems();renderCfg();render();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
