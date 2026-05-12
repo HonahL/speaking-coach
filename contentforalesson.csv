@@ -1,0 +1,50 @@
+级别,级别说明,主题id,主题（中文）,主题(英文),学习目标（英文版）,模块,id唯一值,操作（新增/ 删除/更新）,实景介绍（15字以内）中文,实景介绍英文,开场白,强控问题-prompt,任务类型,任务目标,外场景图片（3:4）,内场景图片(4:3),场景图片描述-promt,人物图片,场景身份-prompt,人物音色,单词,美式音标,英式音标,词性,释义,配图,带读文本(英),带读文本(中）,易错音标视频（易剪辑）1个,文本,图片,带读文本(英),带读文本(中),导入,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",实景演练,1110000,新增,选选你喜欢的玩具！,Choose your favourtie toy!,Wow~So many toys!,"1. Do you like toys?\n
+2. What's your favourite toy?\n
+3. What colour is it?\n",看图聊,"1. 使用My favourite ... 句式\n
+2. 使用It is ... 回答物品颜色\n
+3. 使用What's your favourite ... 句式提问\n
+",https://qz-data.oss-cn-beijing.aliyuncs.com/Miss%20Lang/ai-1778294579774.png,https://qz-data.oss-cn-beijing.aliyuncs.com/%E7%8E%A9%E5%85%B7%E5%BA%97.png,"在一个玩具店里。有1列货架，有4排。最上边的一排是3只玩具熊，分别是粉色、红色、白色。第二排是3只机器人，有绿色、蓝色、红色。第三排是doll，穿着橙色裙子，白色裙子和红色裙子。第4排是风筝和积木，有不同颜色。
+",https://qz-data.oss-cn-beijing.aliyuncs.com/%E5%A5%B3%E7%AB%A5.png,一个7岁女孩，正在玩具店里和用户一起对话闲逛，挑选玩具。,女童A,,,,,,,,,qq,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",单词跟读,1110001,新增,,,,,选项时,"[
+{
+""text"": ""使用My favourite ... 句式"",
+""option"": [
+{
+""img"": """",
+""desc"": ""描述""
+},
+{
+""img"": """",
+""desc"": ""描述""
+}
+]
+},
+{
+""text"": ""使用My favourite ... 句式""
+}
+]",,,,,,,toy,/tɔɪ/,/tɔɪ/,n.,玩具,https://qz-data.oss-cn-beijing.aliyuncs.com/toy.png,"Toy car, toy bear, toy robot — these are all toys.",玩具汽车、玩具熊、玩具机器人——这些都是玩具。,,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",单词跟读,1110002,新增,,,,,,,,,,,,,robot,/ˈroʊbɑːt/,/ˈrəʊ.bɒt/,n.,机器人,https://qz-data.oss-cn-beijing.aliyuncs.com/image.png,Robot! A cool robot!,机器人！一个酷酷的机器人！,,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",单词跟读,1110003,新增,,,,,,,,,,,,,monster,/ˈmɑːnstər/,"/ˈmɒnt.stər/
+",n.,怪兽,https://qz-data.oss-cn-beijing.aliyuncs.com/%E5%A4%A7%E7%86%8A.png,Monsters can also be very cute.,怪兽也可以很可爱。,,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",单词跟读,1110004,新增,,,,,,,,,,,,,doll,/dɑːl/,/dɒl/,n.,娃娃,https://qz-data.oss-cn-beijing.aliyuncs.com/%E5%B8%83%E5%A8%83%E5%A8%83.png,Doll! A pretty doll!,娃娃！一个漂亮的娃娃！,,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",单词跟读,1110005,新增,,,,,,,,,,,,,kite,/kaɪt/,/kaɪt/,n.,风筝,https://qz-data.oss-cn-beijing.aliyuncs.com/%E9%A3%8E%E7%AD%9D.png,What a windy day — perfect for flying a kite!,有风的日子最适合放风筝！,,,,,,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",句子跟读,1110006,新增,,,,,,,,,,,,,,,,,,,,,,What's your favourite toy?,https://qz-data.oss-cn-beijing.aliyuncs.com/%E7%8E%A9%E5%85%B7%E6%88%BF.png,Everyone has a favourite toy — so let's learn how to ask about it.,每个人都有自己最喜欢的玩具，今天我们来学怎么用英语问别人"你最喜欢什么玩具"？,,,,,,,,
+L2,"{“vocabulary"": 300, “exam"": “剑一-"", “CEFR"": “A1-""}",201,Favourite toys,最喜爱的玩具,"1. 能够描述出自己喜欢的玩具名称\n
+2. 能够使用What's your favourite询问对方喜欢的事物并回答\n
+",句子跟读,1110007,新增,,,,,,,,,,,,,,,,,,,,,,What colour is it?,https://qz-data.oss-cn-beijing.aliyuncs.com/%E7%8E%A9%E5%85%B7%E7%86%8A.png,How to ask about colour? We can say “what colour is it”?,怎么问颜色呢？我们可以说"它是什么颜色？",,,,,,,,
+,,,,,,数字人1v1,,新增,,,,,,,,,,,,,,,,,,,,,,,,,,数字人 主题导入,,,,,,,

@@ -145,6 +145,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
 .edit-ready{margin-top:10px;padding:10px;background:var(--ok-bg);border-radius:8px;color:var(--ok);font-weight:700;font-size:13px;text-align:center}
 .edit-pending{margin-top:10px;padding:10px;background:var(--warn-bg);border-radius:8px;color:var(--warn);font-weight:600;font-size:13px;text-align:center}
 
+/* Ending Plan A card */
+.ending-card{display:none;width:100%;padding:28px 24px;border-radius:16px;
+  background:linear-gradient(135deg,#7c6bf0 0%,#a78bfa 50%,#9d8cf0 100%);color:#fff;text-align:left}
+.ending-card.show{display:block}
+.ec-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ec-head .ec-sparkle{font-size:18px;opacity:.85}
+.ec-head .ec-title{font-size:17px;font-weight:800;letter-spacing:.3px}
+.ec-head .ec-badge{font-size:12px;opacity:.7;margin-left:4px}
+.ec-desc{font-size:12px;opacity:.7;margin-bottom:18px}
+.ec-items{display:flex;flex-direction:column;gap:12px}
+.ec-item{display:flex;align-items:center;gap:10px}
+.ec-item .ec-check{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .4s}
+.ec-item .ec-check.done{background:#34d399}
+.ec-item .ec-text{flex:1}
+.ec-item .ec-text strong{font-size:14px;font-weight:700}
+.ec-item .ec-text span{font-size:11px;margin-left:6px;opacity:.8}
+.ec-item .ec-text p{font-size:11px;opacity:.6;margin:1px 0 0}
+.ec-item .ec-status{font-size:12px;font-weight:700;color:#34d399;flex-shrink:0;opacity:0;transition:opacity .3s}
+.ec-item .ec-status.show{opacity:1}
+@keyframes ecSpin{to{transform:rotate(360deg)}}
+.ec-item .ec-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ecSpin .8s linear infinite;flex-shrink:0}
+
+/* Ending Plan B thinking */
+.thinking-box{display:none;width:100%;padding:20px;text-align:left}
+.thinking-box.show{display:flex;flex-direction:column}
+.thinking-box .tk-label{font-size:11px;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.thinking-box .tk-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);animation:tkPulse 1.2s infinite}
+@keyframes tkPulse{0%,100%{opacity:.3}50%{opacity:1}}
+.thinking-box .tk-lines{font-size:14px;line-height:1.9;color:var(--t2);font-style:italic;max-height:160px;overflow-y:auto}
+.thinking-box .tk-cursor{display:inline-block;width:2px;height:15px;background:var(--primary);animation:tkBlink .5s infinite;vertical-align:text-bottom;margin-left:1px}
+@keyframes tkBlink{0%,100%{opacity:1}50%{opacity:0}}
+
 /* Score toast — inside teacher panel */
 .score-toast{position:absolute;inset:0;z-index:3;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
@@ -198,10 +231,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-
       </div>
       <div class="badge" id="badge">idle</div>
     </div>
-    <div class="sim-card"><div class="wd" id="wd">
-      <div class="emoji" id="wdE">🎓</div><div class="word" id="wdW">Ready</div>
-      <div class="phon" id="wdP"></div><div class="tr" id="wdT">准备开始</div>
-    </div></div>
+    <div class="sim-card">
+      <div class="wd" id="wd">
+        <div class="emoji" id="wdE">🎓</div><div class="word" id="wdW">Ready</div>
+        <div class="phon" id="wdP"></div><div class="tr" id="wdT">准备开始</div>
+      </div>
+      <div class="ending-card" id="endingCard">
+        <div class="ec-head"><span class="ec-sparkle">✨</span><span class="ec-title">Coach is adjusting your challenge</span><span class="ec-badge">· 难度调整中</span></div>
+        <div class="ec-desc">根据你的跟练表现，为实景演练匹配合适难度</div>
+        <div class="ec-items">
+          <div class="ec-item" id="ecItem0"><div class="ec-check" id="ecChk0"></div><div class="ec-text"><strong>发音水平分析</strong><span>Pronunciation</span><p>音准、流利度与语调评估</p></div><div class="ec-status" id="ecSt0">✓ 完成</div></div>
+          <div class="ec-item" id="ecItem1"><div class="ec-check" id="ecChk1"></div><div class="ec-text"><strong>词汇掌握评估</strong><span>Vocabulary</span><p>统计对本课词汇掌握情况</p></div><div class="ec-status" id="ecSt1">✓ 完成</div></div>
+          <div class="ec-item" id="ecItem2"><div class="ec-check" id="ecChk2"></div><div class="ec-text"><strong>调整实景演练难度</strong><span>Scene Difficulty</span><p>为你定制实景对话的词汇量与句式要求</p></div><div class="ec-status" id="ecSt2">✓ 完成</div></div>
+        </div>
+      </div>
+      <div class="thinking-box" id="thinkingBox">
+        <div class="tk-label"><span class="tk-dot"></span>Teacher is thinking...</div>
+        <div class="tk-lines" id="tkLines"></div>
+      </div>
+    </div>
   </div>
   <div class="sim-bot">
     <div class="sub-bar"><div class="sub-en" id="subEn">选择课程环节开始模拟</div><div class="sub-zh" id="subZh"></div></div>
@@ -327,10 +375,15 @@ const TTS={
     {en:"Now let's use these words in a real conversation.",zh:"现在让我们在真实对话中使用这些单词吧"},
     {en:"It's time to use what you learned in a real conversation.",zh:"是时候在真实对话中运用你学到的内容了"}
   ],
-  ending:[
+  ending_a:[
     {en:"Let me take a look at how you did today, and set up the perfect challenge for you.",zh:"让我看看你今天的表现，然后为你准备一个最适合你的挑战"},
     {en:"Analyzing your performance now, I'm putting together something just right for you.",zh:"我正在分析你的表现，并为你准备一个刚刚适合你的挑战"},
     {en:"Give me just a moment… I'm checking your results and building your challenge.",zh:"稍等一下……我正在查看你的结果，并为你生成接下来的挑战"}
+  ],
+  ending_b:[
+    {en:"Okay let me check your results... your pronunciation is looking quite good today, the accuracy on most words was solid... let me see the vocabulary side... right, you picked up almost all the new words, that's great... now I'm going to find the right difficulty level for your conversation practice, something that matches where you are right now...",zh:""},
+    {en:"Hmm let me pull up your data... so your pronunciation, yeah that was pretty strong, especially on the tricky sounds... vocabulary coverage looks good too, you remembered most of them... alright, I'm setting up a conversation scene that should be just the right level of challenge for you...",zh:""},
+    {en:"Let me take a look here... okay so pronunciation wise you did really well, your rhythm and intonation are improving... and the words, let me check... yes you got most of them right, nice work... now let me adjust the difficulty so the next part feels just right for you...",zh:""}
   ]
 };
 
@@ -405,7 +458,7 @@ function getSimpleVars(it){
   if(!it)return[];
   if(it.type==='intro')return TTS.intro.map(t=>rep(t,it));
   if(it.type==='summary')return TTS.summary.map(t=>rep(t,it));
-  if(it.type==='ending')return TTS.ending.map(t=>rep(t,it));
+  if(it.type==='ending')return TTS.ending_a.map(t=>rep(t,it));
   return[];
 }
 
@@ -485,10 +538,52 @@ function speak(text,cb){
   const u=new SpeechSynthesisUtterance(text);u.voice=selVoice;u.rate=parseFloat(document.getElementById('rateRange').value);
   u.onend=()=>cb?.();u.onerror=()=>cb?.();synth.speak(u);
 }
-function stopAll(){synth.cancel();autoState.running=false;hideModal();setTeacher('idle');render()}
+function stopAll(){synth.cancel();autoState.running=false;hideModal();stopThinking();setTeacher('idle');render()}
 
 // ============= UI HELPERS =============
 function setSub(en,zh){document.getElementById('subEn').textContent=en||'';document.getElementById('subZh').textContent=zh||''}
+
+function resetEndingCard(){
+  for(let i=0;i<3;i++){
+    document.getElementById('ecChk'+i).innerHTML='';
+    document.getElementById('ecChk'+i).classList.remove('done');
+    document.getElementById('ecSt'+i).classList.remove('show');
+  }
+}
+function animateEndingCard(){
+  const delays=[800,2200,3600];
+  for(let i=0;i<3;i++){
+    setTimeout(()=>{
+      const chk=document.getElementById('ecChk'+i);
+      chk.innerHTML='<div class="ec-spinner"></div>';
+    },delays[i]-600);
+    setTimeout(()=>{
+      const chk=document.getElementById('ecChk'+i);
+      chk.innerHTML='✓';chk.classList.add('done');
+      document.getElementById('ecSt'+i).classList.add('show');
+    },delays[i]);
+  }
+}
+
+let thinkingTimer=null;
+function startThinking(text){
+  clearInterval(thinkingTimer);
+  const c=document.getElementById('tkLines');c.innerHTML='<span class="tk-cursor"></span>';
+  const box=document.getElementById('thinkingBox');
+  document.getElementById('wd').style.display='none';
+  document.getElementById('endingCard').classList.remove('show');
+  box.classList.add('show');
+  let idx=0;
+  const speed=55;
+  thinkingTimer=setInterval(()=>{
+    if(idx>=text.length){clearInterval(thinkingTimer);const cur=c.querySelector('.tk-cursor');if(cur)cur.remove();return}
+    const cursor=c.querySelector('.tk-cursor');
+    const span=document.createTextNode(text[idx]);
+    c.insertBefore(span,cursor);
+    idx++;
+  },speed);
+}
+function stopThinking(){clearInterval(thinkingTimer);const cur=document.querySelector('.tk-cursor');if(cur)cur.remove()}
 function setTeacher(s){
   const p=document.getElementById('teacherPanel'),b=document.getElementById('badge');p.classList.remove('speaking');
   if(s==='speaking'){p.classList.add('speaking');b.textContent='🗣 Speaking'}else if(s==='waiting'){b.textContent='🎤 Waiting'}else{b.textContent='idle'}
@@ -571,6 +666,9 @@ function renderTimeline(){
 function renderSim(){
   const it=items[curItem],wd=document.getElementById('wd'),e=document.getElementById('wdE'),w=document.getElementById('wdW'),p=document.getElementById('wdP'),t=document.getElementById('wdT');
   wd.classList.remove('sent');
+  const endingCard=document.getElementById('endingCard');
+  const thinkingBox=document.getElementById('thinkingBox');
+  endingCard.classList.remove('show');thinkingBox.classList.remove('show');wd.style.display='';
   if(!it)return;
   if(it.type==='intro'){e.textContent='🎓';w.textContent='Welcome!';p.textContent='';t.textContent='课程导入'}
   else if(it.type==='summary'){e.textContent='📝';w.textContent='Summary';p.textContent='';t.textContent='总结'}
@@ -584,6 +682,27 @@ function renderFlow(){
   const fc=document.getElementById('fc'), it=items[curItem];fc.innerHTML='';
   // Simple items
   if(!it||!['word','sentence'].includes(it.type)){
+    if(it?.type==='ending'){
+      const varsA=TTS.ending_a.map(t=>rep(t,it));
+      const varsB=TTS.ending_b.map(t=>rep(t,it));
+      let h='';
+      h+='<div class="fn on"><div class="fb on"><div class="fb-hd">';
+      h+=`<span class="fb-icon">🏆</span><span class="fb-label">Plan A · 难度调整卡片</span>`;
+      h+=`<button class="fb-play" onclick="previewEndingA()">▶</button>`;
+      h+=`<button class="fb-tog" onclick="togExp('ending_a')">▼</button></div>`;
+      h+=`<div class="fv${sel.expandedNode==='ending_a'?' open':''}" id="vars_ending_a">`;
+      varsA.forEach((v,i)=>{h+=varHtml('ending_a',v,i)});
+      h+='</div></div></div>';
+      h+='<div class="fn on" style="margin-top:6px"><div class="fb on"><div class="fb-hd">';
+      h+=`<span class="fb-icon">🧠</span><span class="fb-label">Plan B · 老师 Thinking</span>`;
+      h+=`<button class="fb-play" onclick="previewEndingB()">▶</button>`;
+      h+=`<button class="fb-tog" onclick="togExp('ending_b')">▼</button></div>`;
+      h+=`<div class="fv${sel.expandedNode==='ending_b'?' open':''}" id="vars_ending_b">`;
+      varsB.forEach((v,i)=>{h+=varHtml('ending_b',v,i)});
+      h+='</div></div></div>';
+      fc.innerHTML=h;
+      renderEditSummary();updatePlayBtn();return;
+    }
     const vars=getSimpleVars(it);
     let h='<div class="fn on"><div class="fb on"><div class="fb-hd">';
     h+=`<span class="fb-icon">${it?.label?.charAt(0)||'🎓'}</span><span class="fb-label">${it?.label||''}</span>`;
@@ -756,13 +875,43 @@ function selectVar(nodeId,idx){
   sel.picks[nodeId]=idx;renderFlow();
 }
 function previewVar(nodeId,idx){
-  stopAll();
+  stopAll();stopThinking();
   const it=items[curItem];
   let vars=nodeId==='__simple'?getSimpleVars(it):getVars(nodeId,it);
   if(idx>=vars.length)return;
   setSub(vars[idx].en,vars[idx].zh);setTeacher('speaking');
   speak(vars[idx].en,()=>setTeacher('idle'));
 }
+
+function showEndingA(pickIdx){
+  stopAll();stopThinking();
+  const it=items[curItem];
+  const vars=TTS.ending_a.map(t=>rep(t,it));
+  const idx=pickIdx!=null?pickIdx:Math.floor(Math.random()*vars.length);
+  const pick=vars[idx];
+  document.getElementById('wd').style.display='none';
+  document.getElementById('thinkingBox').classList.remove('show');
+  document.getElementById('endingCard').classList.add('show');
+  resetEndingCard();
+  setSub(pick.en,pick.zh);setTeacher('speaking');
+  animateEndingCard();
+  speak(pick.en,()=>setTeacher('idle'));
+}
+
+function showEndingB(pickIdx){
+  stopAll();stopThinking();
+  const it=items[curItem];
+  const vars=TTS.ending_b.map(t=>rep(t,it));
+  const idx=pickIdx!=null?pickIdx:Math.floor(Math.random()*vars.length);
+  const pick=vars[idx];
+  document.getElementById('endingCard').classList.remove('show');
+  setSub('','');setTeacher('speaking');
+  startThinking(pick.en);
+  speak(pick.en,()=>{setTeacher('idle');stopThinking()});
+}
+
+function previewEndingA(){showEndingA(Math.floor(Math.random()*TTS.ending_a.length))}
+function previewEndingB(){showEndingB(Math.floor(Math.random()*TTS.ending_b.length))}
 function previewRandom(nodeId){
   const it=items[curItem];
   const vars=getVars(nodeId,it);
@@ -775,6 +924,28 @@ function startAutoPlay(){
   stopAll();
   const it=items[curItem];
   if(!it||!['word','sentence'].includes(it.type)){
+    if(it.type==='ending'){
+      const varsA=TTS.ending_a.map(t=>rep(t,it));
+      const varsB=TTS.ending_b.map(t=>rep(t,it));
+      const pickA=varsA[Math.floor(Math.random()*varsA.length)];
+      const pickB=varsB[Math.floor(Math.random()*varsB.length)];
+      document.getElementById('wd').style.display='none';
+      document.getElementById('thinkingBox').classList.remove('show');
+      document.getElementById('endingCard').classList.add('show');
+      resetEndingCard();
+      setSub(pickA.en,pickA.zh);setTeacher('speaking');
+      animateEndingCard();
+      speak(pickA.en,()=>{
+        setTeacher('idle');
+        setTimeout(()=>{
+          document.getElementById('endingCard').classList.remove('show');
+          setSub('','');setTeacher('speaking');
+          startThinking(pickB.en);
+          speak(pickB.en,()=>{setTeacher('idle');stopThinking()});
+        },600);
+      });
+      return;
+    }
     const vars=getSimpleVars(it);if(!vars.length)return;
     const pick=vars[Math.floor(Math.random()*vars.length)];
     setSub(pick.en,pick.zh);setTeacher('speaking');
